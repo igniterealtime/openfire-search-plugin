@@ -1,4 +1,3 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.util.*,
                  org.jivesoftware.openfire.XMPPServer,
                  org.jivesoftware.openfire.plugin.SearchPlugin,
@@ -6,15 +5,15 @@
                  org.jivesoftware.util.*"
 %>
 
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jstl/core_rt" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jstl/fmt_rt" prefix="fmt" %>
 
 <%  // Get parameters
     boolean save = request.getParameter("save") != null;
     boolean success = request.getParameter("success") != null;
     String searchName = ParamUtils.getParameter(request, "searchname");
     boolean searchEnabled = ParamUtils.getBooleanParameter(request, "searchEnabled");
-    boolean groupOnly = ParamUtils.getBooleanParameter(request, "groupOnly");
+	boolean groupOnly = ParamUtils.getBooleanParameter(request, "groupOnly");
     
     SearchPlugin plugin = (SearchPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("search");
 
@@ -36,7 +35,7 @@
                     }
                 }
                 plugin.setExcludedFields(excludedFields);
-                plugin.setGroupOnly(groupOnly);
+				plugin.setGroupOnly(groupOnly);
                 response.sendRedirect("search-props-edit-form.jsp?success=true");
                 return;
             }

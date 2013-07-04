@@ -5,11 +5,10 @@
     <name>Search</name>
     <description>Provides support for Jabber Search (XEP-0055)</description>
     <author>Ryan Graham</author>
-    <version>${project.version}</version>
-    <date>07/24/2016</date>
-    <minServerVersion>4.1.1</minServerVersion>
-    <minJavaVersion>1.8</minJavaVersion>
-
+    <version>1.5.2</version>
+    <date>7/4/2013</date>
+    <minServerVersion>3.7.0</minServerVersion>
+    
     <adminconsole>
         <tab id="tab-server">
             <sidebar id="sidebar-server-settings">
