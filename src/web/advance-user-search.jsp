@@ -1,4 +1,3 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.util.*,
                  java.net.URLEncoder,
                  org.jivesoftware.util.*,
@@ -165,10 +164,10 @@
            <a href="../../user-properties.jsp?username=<%= URLEncoder.encode(user.getUsername(), "UTF-8") %>"><%= JID.unescapeNode(user.getUsername()) %></a>
        </td>
        <td width="33">
-           <%= StringUtils.escapeHTMLTags(user.getName()) %> &nbsp;
+           <%= user.getName() %> &nbsp;
        </td>
        <td width="15%">
-           <%= user.getCreationDate() != null ? JiveGlobals.formatDate(user.getCreationDate()) : "&nbsp;" %>
+           <%= JiveGlobals.formatDate(user.getCreationDate()) %> &nbsp;
        </td>
         <td width="25%">
             <% long logoutTime = presenceManager.getLastActivity(user);
