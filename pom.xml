@@ -4,11 +4,10 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>org.igniterealtime.openfire</groupId>
-        <version>4.3.0-beta</version>
+        <version>4.2.0-SNAPSHOT</version>
     </parent>
     <groupId>org.igniterealtime.openfire.plugins</groupId>
     <artifactId>search</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
     <name>Search Plugin</name>
 
     <build>
