@@ -143,7 +143,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @see org.xmpp.component.Component#getName()
      */
     public String getName() {
-        return pluginManager.getName(this);
+        return PluginMetadataHelper.getName(this);
     }
 
     /*
@@ -152,7 +152,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @see org.xmpp.component.Component#getDescription()
      */
     public String getDescription() {
-        return pluginManager.getDescription(this);
+        return PluginMetadataHelper.getDescription(this);
     }
 
     /*
