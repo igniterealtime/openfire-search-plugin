@@ -4,7 +4,7 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>org.igniterealtime.openfire</groupId>
-        <version>4.3.0</version>
+        <version>4.4.2-SNAPSHOT</version>
     </parent>
     <groupId>org.igniterealtime.openfire.plugins</groupId>
     <artifactId>search</artifactId>
@@ -26,18 +26,10 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
             </plugin>
+            <!-- Compiles the Openfire Admin Console JSP pages. -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-jspc-maven-plugin</artifactId>
-                <!-- Force the Openfire 4.2.x compatible version of JSP -->
-                <version>9.2.14.v20151106</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.igniterealtime.openfire</groupId>
-                        <artifactId>xmppserver</artifactId>
-                        <version>${openfire.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
