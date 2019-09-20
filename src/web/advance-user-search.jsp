@@ -6,6 +6,8 @@
                  org.xmpp.packet.JID,
                  java.util.*"
 %>
+<%@ page import="org.jivesoftware.util.CookieUtils" %>
+<%@ page import="org.jivesoftware.util.StringUtils" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -28,7 +30,22 @@
 
     Set<User> users = new HashSet<>();
 
-    if ( criteria != null )
+    Map<String, String> errors = new HashMap<>();
+
+    Cookie csrfCookie = CookieUtils.getCookie(request, "csrf");
+    String csrfParam = ParamUtils.getParameter(request, "csrf");
+
+    if (criteria != null) {
+        if (csrfCookie == null || csrfParam == null || !csrfCookie.getValue().equals(csrfParam)) {
+            criteria = null;
+            errors.put("csrf", "CSRF Failure!");
+        }
+    }
+    csrfParam = StringUtils.randomString(15);
+    CookieUtils.setCookie(request, response, "csrf", csrfParam, -1);
+    pageContext.setAttribute("csrf", csrfParam);
+
+    if ( errors.isEmpty() && criteria != null )
     {
         for ( String searchField : searchFields )
         {
@@ -56,9 +73,15 @@
     pageContext.setAttribute( "users", users );
     pageContext.setAttribute( "presenceManager", XMPPServer.getInstance().getPresenceManager() );
     pageContext.setAttribute( "readOnly", UserManager.getUserProvider().isReadOnly() );
+    pageContext.setAttribute( "errors", errors );
 %>
 
+<c:if test="${not empty errors}">
+    <admin:infobox type="error"><fmt:message key="advance.user.search.error" /></admin:infobox>
+</c:if>
+
 <form name="f" action="advance-user-search.jsp">
+    <input type="hidden" name="csrf" value="${csrf}">
     <input type="hidden" name="search" value="true"/>
     <input type="hidden" name="moreOptions" value="${fn:escapeXml(moreOptions)}"/>
 
