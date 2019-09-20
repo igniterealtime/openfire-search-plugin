@@ -22,6 +22,20 @@
 
     // Handle a save
     Map<String,String> errors = new HashMap<>();
+
+    Cookie csrfCookie = CookieUtils.getCookie(request, "csrf");
+    String csrfParam = ParamUtils.getParameter(request, "csrf");
+
+    if (save) {
+        if (csrfCookie == null || csrfParam == null || !csrfCookie.getValue().equals(csrfParam)) {
+            save = false;
+            errors.put("csrf", "CSRF Failure!");
+        }
+    }
+    csrfParam = StringUtils.randomString(15);
+    CookieUtils.setCookie(request, response, "csrf", csrfParam, -1);
+    pageContext.setAttribute("csrf", csrfParam);
+
     if (save) {
         if (searchName == null || searchName.indexOf('.') >= 0 || searchName.trim().length() < 1) {
             errors.put("searchname", "searchname");
@@ -87,6 +101,7 @@
     </c:choose>
 
     <form action="search-props-edit-form.jsp?save" method="post">
+    <input type="hidden" name="csrf" value="${csrf}">
 
     <fmt:message key="search.props.edit.form.service_enabled" var="serviceEnabledBoxtitle"/>
     <admin:contentBox title="${serviceEnabledBoxtitle}">
