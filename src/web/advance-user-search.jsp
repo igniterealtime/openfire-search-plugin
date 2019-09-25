@@ -169,21 +169,21 @@
                             <td width="1%" align="center" valign="middle">
                                 <c:choose>
                                     <c:when test="${presenceManager.isAvailable(user)}">
-                                        <c:set var="show" value="${presenceManager.getPresence(user).show}}"/>
+                                        <c:set var="show" value="${presenceManager.getPresence(user).show}"/>
                                         <c:choose>
                                             <c:when test="${empty show}">
                                                 <img src="images/user-green-16x16.gif" width="16" height="16" border="0" alt="<fmt:message key="advance.user.search.available" />">
                                             </c:when>
-                                            <c:when test="${show.name() eq 'chat'}">
+                                            <c:when test="${show eq 'chat'}">
                                                 <img src="images/user-green-16x16.gif" width="16" height="16" border="0" alt="<fmt:message key="advance.user.search.chat_available" />">
                                             </c:when>
-                                            <c:when test="${show.name() eq 'away'}">
+                                            <c:when test="${show eq 'away'}">
                                                 <img src="images/user-yellow-16x16.gif" width="16" height="16" border="0" alt="<fmt:message key="advance.user.search.away" />">
                                             </c:when>
-                                            <c:when test="${show.name() eq 'xa'}">
+                                            <c:when test="${show eq 'xa'}">
                                                 <img src="images/user-yellow-16x16.gif" width="16" height="16" border="0" alt="<fmt:message key="advance.user.search.extended" />">
                                             </c:when>
-                                            <c:when test="${show.name() eq 'dnd'}">
+                                            <c:when test="${show eq 'dnd'}">
                                                 <img src="images/user-red-16x16.gif" width="16" height="16" border="0" alt="<fmt:message key="advance.user.search.not_disturb" />">
                                             </c:when>
                                         </c:choose>
@@ -205,7 +205,7 @@
                                         <c:out value="${admin:formatDate(user.creationDate)}"/>
                                     </c:when>
                                     <c:otherwise>
-                                        <c:out value="&nbps;"/>
+                                        &nbsp;
                                     </c:otherwise>
                                 </c:choose>
                             </td>
@@ -216,7 +216,7 @@
                                         <c:out value="${admin:elapsedTime(logoutTime)}"/>
                                     </c:when>
                                     <c:otherwise>
-                                        <c:out value="&nbps;"/>
+                                        &nbsp;
                                     </c:otherwise>
                                 </c:choose>
                             </td>
