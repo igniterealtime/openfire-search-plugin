@@ -29,6 +29,7 @@
     List<String> selectedFields = new ArrayList<>();
 
     Set<User> users = new HashSet<>();
+    Map<User, String> elapsed = new HashMap<>(); // This is no longer needed with Openfire 4.4.2.
 
     Map<String, String> errors = new HashMap<>();
 
@@ -60,6 +61,13 @@
                     if ( user != null )
                     {
                         users.add( user );
+
+                        // This is no longer needed with Openfire 4.4.2. (use admin:getElapsedTime() taglib function)
+                        final long lastActivity = XMPPServer.getInstance().getPresenceManager().getLastActivity( user );
+                        if ( lastActivity > 0 )
+                        {
+                            elapsed.put( user, StringUtils.getElapsedTime( lastActivity ) );
+                        }
                     }
                 }
             }
@@ -74,6 +82,7 @@
     pageContext.setAttribute( "presenceManager", XMPPServer.getInstance().getPresenceManager() );
     pageContext.setAttribute( "readOnly", UserManager.getUserProvider().isReadOnly() );
     pageContext.setAttribute( "errors", errors );
+    pageContext.setAttribute( "elapsed", elapsed ); // This is no longer needed with Openfire 4.4.2. (use admin:formatDate() taglib function)
 %>
 
 <c:if test="${not empty errors}">
@@ -194,7 +203,7 @@
                                 </c:choose>
                             </td>
                             <td width="23%">
-                                <a href="../../user-properties.jsp?username=${admin:urlEncode(user.username)}"><c:out value="${JID.unescapeNode(user.username)}"/></a>
+                                <a href="../../user-properties.jsp?username=${admin:urlEncode(user.username)}"><c:out value="${user.username}"/></a>
                             </td>
                             <td width="33">
                                 <c:out value="${user.name}"/>
@@ -210,16 +219,28 @@
                                 </c:choose>
                             </td>
                             <td width="25%">
-                                <c:set var="logoutTime" value="${presenceManager.getLastActivity(user)}"/>
+                                <c:set var="logoutTime" value="${elapsed.get(user)}"/>
                                 <c:choose>
-                                    <c:when test="${not empty logoutTime and logoutTime gt -1}">
-                                        <c:out value="${admin:elapsedTime(logoutTime)}"/>
+                                    <c:when test="${not empty logoutTime}">
+                                        <c:out value="${logoutTime}"/>
                                     </c:when>
                                     <c:otherwise>
                                         &nbsp;
                                     </c:otherwise>
                                 </c:choose>
                             </td>
+<%-- Restore this section when building agains Openfire 4.4.2 --%>
+<%--                            <td width="25%">--%>
+<%--                                <c:set var="logoutTime" value="${presenceManager.getLastActivity(user)}"/>--%>
+<%--                                <c:choose>--%>
+<%--                                    <c:when test="${not empty logoutTime and logoutTime gt -1}">--%>
+<%--                                        <c:out value="${admin:elapsedTime(logoutTime)}"/>--%>
+<%--                                    </c:when>--%>
+<%--                                    <c:otherwise>--%>
+<%--                                        &nbsp;--%>
+<%--                                    </c:otherwise>--%>
+<%--                                </c:choose>--%>
+<%--                            </td>--%>
                             <!-- Don't allow editing or deleting if users are read-only. -->
                             <c:if test="${not readOnly}">
                                 <td width="1%" align="center">
