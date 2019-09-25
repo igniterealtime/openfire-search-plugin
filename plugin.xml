@@ -7,7 +7,7 @@
     <author>Ryan Graham</author>
     <version>${project.version}</version>
     <date>09/20/2019</date>
-    <minServerVersion>4.4.2</minServerVersion>
+    <minServerVersion>4.1.1</minServerVersion>
     <minJavaVersion>1.8</minJavaVersion>
 
     <adminconsole>
