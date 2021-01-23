@@ -702,7 +702,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
             }
             if (field.equals("search")) {
                 search = value;
-            } else if (isTruthy(value)) {
+            } else if (value.equals("1")) {
                 searchFields.add(field);
             }
         }
@@ -712,10 +712,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         }
 
         return searchList;
-    }
-
-    private static boolean isTruthy(final String value) {
-        return "1".equals(value) || Boolean.parseBoolean(value);
     }
 
     /**

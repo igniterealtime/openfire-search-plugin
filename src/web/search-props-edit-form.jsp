@@ -8,8 +8,6 @@
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-<%@ taglib uri="admin" prefix="admin" %>
 
 <%  // Get parameters
     boolean save = request.getParameter("save") != null;
@@ -21,21 +19,7 @@
     SearchPlugin plugin = (SearchPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("search");
 
     // Handle a save
-    Map<String,String> errors = new HashMap<>();
-
-    Cookie csrfCookie = CookieUtils.getCookie(request, "csrf");
-    String csrfParam = ParamUtils.getParameter(request, "csrf");
-
-    if (save) {
-        if (csrfCookie == null || csrfParam == null || !csrfCookie.getValue().equals(csrfParam)) {
-            save = false;
-            errors.put("csrf", "CSRF Failure!");
-        }
-    }
-    csrfParam = StringUtils.randomString(15);
-    CookieUtils.setCookie(request, response, "csrf", csrfParam, -1);
-    pageContext.setAttribute("csrf", csrfParam);
-
+    Map<String,String> errors = new HashMap<String,String>();
     if (save) {
         if (searchName == null || searchName.indexOf('.') >= 0 || searchName.trim().length() < 1) {
             errors.put("searchname", "searchname");
@@ -45,7 +29,7 @@
                 plugin.setServiceEnabled(searchEnabled);
                 plugin.setServiceName(searchName.trim());
 
-                ArrayList<String> excludedFields = new ArrayList<>();
+                ArrayList<String> excludedFields = new ArrayList<String>();
                 for (String field : UserManager.getInstance().getSearchFields()) {
                     if (!ParamUtils.getBooleanParameter(request, field)) {
                          excludedFields.add(field);
@@ -69,15 +53,6 @@
     searchEnabled = plugin.getServiceEnabled();
     Collection<String> searchableFields = plugin.getFilteredSearchFields();
     groupOnly = plugin.isGroupOnly();
-
-    pageContext.setAttribute( "errors", errors );
-    pageContext.setAttribute( "success", success );
-    pageContext.setAttribute( "searchEnabled", searchEnabled );
-    pageContext.setAttribute( "searchName", searchName );
-    pageContext.setAttribute( "availableSearchFields", UserManager.getInstance().getSearchFields() );
-    pageContext.setAttribute( "searchableFields", searchableFields );
-    pageContext.setAttribute( "groupOnly", groupOnly );
-    pageContext.setAttribute( "xmppDomain", XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
 %>
 
 <html>
@@ -87,25 +62,42 @@
     </head>
     <body>
 
-    <p>
-        <fmt:message key="search.props.edit.form.directions" />
-    </p>
+<p>
+<fmt:message key="search.props.edit.form.directions" />
+</p>
 
-    <c:choose>
-        <c:when test="${not empty errors}">
-            <admin:infobox type="error"><fmt:message key="search.props.edit.form.error" /></admin:infobox>
-        </c:when>
-        <c:when test="${success}">
-            <admin:infobox type="success"><fmt:message key="search.props.edit.form.successful_edit" /></admin:infobox>
-        </c:when>
-    </c:choose>
+<%  if (success) { %>
 
-    <form action="search-props-edit-form.jsp?save" method="post">
-    <input type="hidden" name="csrf" value="${csrf}">
+    <div class="jive-success">
+    <table cellpadding="0" cellspacing="0" border="0">
+    <tbody>
+        <tr><td class="jive-icon"><img src="images/success-16x16.gif" width="16" height="16" border="0" alt=""></td>
+        <td class="jive-icon-label">
+            <fmt:message key="search.props.edit.form.successful_edit" />
+        </td></tr>
+    </tbody>
+    </table>
+    </div><br>
 
-    <fmt:message key="search.props.edit.form.service_enabled" var="serviceEnabledBoxtitle"/>
-    <admin:contentBox title="${serviceEnabledBoxtitle}">
+<%  } else if (errors.size() > 0) { %>
 
+    <div class="jive-error">
+    <table cellpadding="0" cellspacing="0" border="0">
+    <tbody>
+        <tr><td class="jive-icon"><img src="images/error-16x16.gif" width="16" height="16" border="0" alt=""></td>
+        <td class="jive-icon-label">
+            <fmt:message key="search.props.edit.form.error" />
+        </td></tr>
+    </tbody>
+    </table>
+    </div><br>
+
+<%  } %>
+
+<form action="search-props-edit-form.jsp?save" method="post">
+
+<div class="jive-contentBoxHeader"><fmt:message key="search.props.edit.form.service_enabled" /></div>
+<div class="jive-contentBox">
     <p>
     <fmt:message key="search.props.edit.form.service_enabled_directions" />
     </p>
@@ -113,7 +105,8 @@
     <tbody>
         <tr>
             <td width="1%">
-                <input type="radio" name="searchEnabled" value="true" id="rb01" ${searchEnabled ? 'checked' : ''}>
+            <input type="radio" name="searchEnabled" value="true" id="rb01"
+             <%= ((searchEnabled) ? "checked" : "") %>>
             </td>
             <td width="99%">
                 <label for="rb01"><b><fmt:message key="search.props.edit.form.enabled" /></b></label> - <fmt:message key="search.props.edit.form.enabled_details" />
@@ -121,7 +114,8 @@
         </tr>
         <tr>
             <td width="1%">
-                <input type="radio" name="searchEnabled" value="false" id="rb02" ${not searchEnabled ? 'checked' : ''}>
+            <input type="radio" name="searchEnabled" value="false" id="rb02"
+             <%= ((!searchEnabled) ? "checked" : "") %>>
             </td>
             <td width="99%">
                 <label for="rb02"><b><fmt:message key="search.props.edit.form.disabled" /></b></label> - <fmt:message key="search.props.edit.form.disabled_details" />
@@ -129,32 +123,36 @@
         </tr>
     </tbody>
     </table>
-    </admin:contentBox>
+</div>
 
-    <fmt:message key="search.props.edit.form.service_name" var="serviceNameBoxtitle"/>
-    <admin:contentBox title="${serviceNameBoxtitle}">
+<br>
+
+<div class="jive-contentBoxHeader"><fmt:message key="search.props.edit.form.service_name" /></div>
+<div class="jive-contentBox">
     <table cellpadding="3" cellspacing="0" border="0">
     <tr>
         <td class="c1">
-            <label for="searchname">
-                <fmt:message key="search.props.edit.form.search_service_name" />:
-            </label>
+           <fmt:message key="search.props.edit.form.search_service_name" />:
         </td>
         <td>
-            <input type="text" size="30" maxlength="150" name="searchname" id="searchname" value="${not empty searchName ? fn:escapeXml(searchName) : ''}">.<c:out value="${xmppDomain}"/>
+        <input type="text" size="30" maxlength="150" name="searchname"  value="<%= (searchName != null ? searchName : "") %>">.<%=XMPPServer.getInstance().getServerInfo().getXMPPDomain() %>
 
-            <c:if test="${errors.containsKey('searchname')}">
-                <span class="jive-error-text">
-                <br><fmt:message key="search.props.edit.form.search_service_name_details" />
-                </span>
-            </c:if>
+        <%  if (errors.containsKey("searchname")) { %>
+
+            <span class="jive-error-text">
+            <br><fmt:message key="search.props.edit.form.search_service_name_details" />
+            </span>
+
+        <%  } %>
         </td>
     </tr>
     </table>
-    </admin:contentBox>
+</div>
 
-    <fmt:message key="search.props.edit.form.searchable_fields" var="fieldsBoxtitle"/>
-    <admin:contentBox title="${fieldsBoxtitle}">
+<br>
+
+<div class="jive-contentBoxHeader"><fmt:message key="search.props.edit.form.searchable_fields" /></div>
+<div class="jive-contentBox">
     <p>
     <fmt:message key="search.props.edit.form.searchable_fields_details" />
     </p>
@@ -163,14 +161,14 @@
             <th align="center" width="1%"><fmt:message key="search.props.edit.form.enabled" /></th>
             <th align="left" width="99%"><fmt:message key="search.props.edit.form.fields" /></th>
         </tr>
-        <c:forEach items="${availableSearchFields}" var="field">
-            <tr>
-                <td align="center" width="1%"><input type="checkbox" ${searchableFields.contains( field ) ? 'checked' : ''} name="${fn:escapeXml(field)}" id="${fn:escapeXml(field)}"></td>
-                <td align="left" width="99%"><label for="${fn:escapeXml(field)}"><c:out value="${field}"/></label></td>
-            </tr>
-        </c:forEach>
+        <% for (String field : UserManager.getInstance().getSearchFields()) { %>
+        <tr>
+            <td align="center" width="1%"><input type="checkbox"  <%=searchableFields.contains(field) ? "checked" : "" %>  name="<%=field %>"></td>
+            <td align="left" width="99%"><%=field %></td>
+        </tr>
+        <% } %>
     </table>
-    </admin:contentBox>
+</div>
 
 <br>
 
@@ -183,7 +181,8 @@
     <tbody>
         <tr>
             <td width="1%">
-                <input type="radio" name="groupOnly" value="false" id="rb-grouponly-01" ${not groupOnly ? 'checked' : ''}>
+            <input type="radio" name="groupOnly" value="false" id="rb-grouponly-01"
+             <%= ((!groupOnly) ? "checked" : "") %>>
             </td>
             <td width="99%">
                 <label for="rb-grouponly-01"><b><fmt:message key="search.props.edit.form.search_scope_anyone" /></b></label> - <fmt:message key="search.props.edit.form.search_scope_anyone_details" />
@@ -191,7 +190,8 @@
         </tr>
         <tr>
             <td width="1%">
-                <input type="radio" name="groupOnly" value="true" id="rb-grouponly-02" ${groupOnly ? 'checked' : ''}>
+            <input type="radio" name="groupOnly" value="true" id="rb-grouponly-02"
+             <%= ((groupOnly) ? "checked" : "") %>>
             </td>
             <td width="99%">
                 <label for="rb-grouponly-02"><b><fmt:message key="search.props.edit.form.search_scope_groups" /></b></label> - <fmt:message key="search.props.edit.form.search_scope_groups_details" />
