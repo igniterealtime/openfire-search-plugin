@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -742,7 +743,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         for (final User user : users) {
             final String username = JID.unescapeNode(user.getUsername());
 
-            final Map<String, Object> item = new HashMap<String, Object>();
+            final LinkedHashMap<String, Object> item = new  LinkedHashMap<String, Object>();
             item.put("jid", username + "@" + serverName);
 
             item.put(LocaleUtils.getLocalizedString("advance.user.search.username", "search"), username);
