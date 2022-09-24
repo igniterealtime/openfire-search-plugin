@@ -17,20 +17,8 @@
 package org.jivesoftware.openfire.plugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -746,12 +734,12 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
             final LinkedHashMap<String, Object> item = new  LinkedHashMap<String, Object>();
             item.put("jid", username + "@" + serverName);
 
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.username", "search"), username);
+            item.put(LocaleUtils.getLocalizedString("advance.user.search.username", "search",null, Locale.ENGLISH,false), username);
 
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.name", "search"),
+            item.put(LocaleUtils.getLocalizedString("advance.user.search.name", "search",null, Locale.ENGLISH,false),
                     (user.isNameVisible() ? removeNull(user.getName()) : ""));
 
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.email", "search"),
+            item.put(LocaleUtils.getLocalizedString("advance.user.search.email", "search",null, Locale.ENGLISH,false),
                     (user.isEmailVisible() ? removeNull(user.getEmail()) : ""));
 
             searchResults.addItemFields(item);
