@@ -731,16 +731,16 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         for (final User user : users) {
             final String username = JID.unescapeNode(user.getUsername());
 
-            final LinkedHashMap<String, Object> item = new  LinkedHashMap<String, Object>();
+            searchResults.addReportedField("jid", LocaleUtils.getLocalizedString("advance.user.search.jid", "search"), FormField.Type.jid_single );
+            searchResults.addReportedField("username", LocaleUtils.getLocalizedString("advance.user.search.username", "search"), FormField.Type.text_single );
+            searchResults.addReportedField("name", LocaleUtils.getLocalizedString("advance.user.search.name", "search"), FormField.Type.text_single );
+            searchResults.addReportedField("email", LocaleUtils.getLocalizedString("advance.user.search.email", "search"), FormField.Type.text_single );
+
+            final LinkedHashMap<String, Object> item = new  LinkedHashMap<>();
             item.put("jid", username + "@" + serverName);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.username", "search",null, Locale.ENGLISH,false), username);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.name", "search",null, Locale.ENGLISH,false),
-                    (user.isNameVisible() ? removeNull(user.getName()) : ""));
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.email", "search",null, Locale.ENGLISH,false),
-                    (user.isEmailVisible() ? removeNull(user.getEmail()) : ""));
+            item.put("username", username);
+            item.put("name", (user.isNameVisible() ? removeNull(user.getName()) : ""));
+            item.put("email", (user.isEmailVisible() ? removeNull(user.getEmail()) : ""));
 
             searchResults.addItemFields(item);
         }
