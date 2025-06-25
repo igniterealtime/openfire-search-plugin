@@ -18,7 +18,7 @@
     boolean searchEnabled = ParamUtils.getBooleanParameter(request, "searchEnabled");
     boolean groupOnly = ParamUtils.getBooleanParameter(request, "groupOnly");
     
-    SearchPlugin plugin = (SearchPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("search");
+    SearchPlugin plugin = (SearchPlugin) XMPPServer.getInstance().getPluginManager().getPluginByName("Search").orElseThrow();
 
     // Handle a save
     Map<String,String> errors = new HashMap<>();
