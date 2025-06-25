@@ -6,9 +6,9 @@
     <description>Provides support for Jabber Search (XEP-0055)</description>
     <author>Ryan Graham</author>
     <version>${project.version}</version>
-    <date>2023-07-20</date>
-    <minServerVersion>4.1.1</minServerVersion>
-    <minJavaVersion>1.8</minJavaVersion>
+    <date>2025-06-25</date>
+    <minServerVersion>4.4.0</minServerVersion>
+    <minJavaVersion>11</minJavaVersion>
 
     <adminconsole>
         <tab id="tab-server">
