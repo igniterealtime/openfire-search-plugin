@@ -67,6 +67,8 @@ import org.xmpp.packet.PacketError.Condition;
 import org.xmpp.resultsetmanagement.ResultSet;
 import org.xmpp.resultsetmanagement.ResultSetImpl;
 
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+
 /**
  * Provides support for Jabber Search (<a href="http://www.xmpp.org/extensions/xep-0055.html">XEP-0055</a>).
  * <p>
@@ -100,23 +102,22 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
     private static String serverName;
 
-    private TreeMap<String, String> fieldLookup = new TreeMap<String, String>(new CaseInsensitiveComparator());
+    private TreeMap<String, String> fieldLookup = new TreeMap<>(CASE_INSENSITIVE_ORDER);
     private Map<String, String> reverseFieldLookup = new HashMap<String, String>();
 
     /**
      * A list of field names that are valid in jabber:iq:search
      */
-    public final static Collection<String> validSearchRequestFields = new ArrayList<String>();
-    static {
-        validSearchRequestFields.add("first");
-        validSearchRequestFields.add("last");
-        validSearchRequestFields.add("nick");
-        validSearchRequestFields.add("email");
-        validSearchRequestFields.add("x"); // extended info
+    public final static Collection<String> validSearchRequestFields = Arrays.asList(
+        "first",
+        "last",
+        "nick",
+        "email",
+        "x", // extended info
 
         // result set management (XEP-0059)
-        validSearchRequestFields.add("set");
-    }
+        "set"
+    );
 
     public SearchPlugin() {
         serviceName = JiveGlobals.getProperty(SERVICENAME, "search");
@@ -284,17 +285,22 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
             return replyPacket;
         }
 
-        if (namespace.equals(NAMESPACE_JABBER_IQ_SEARCH)) {
-            replyPacket = handleSearchRequest(iq);
-        } else if (namespace.equals(IQDiscoInfoHandler.NAMESPACE_DISCO_INFO)) {
-            replyPacket = handleDiscoInfo(iq);
-        } else if (namespace.equals(IQDiscoItemsHandler.NAMESPACE_DISCO_ITEMS)) {
-            replyPacket = IQ.createResultIQ(iq);
-            replyPacket.setChildElement("query", IQDiscoItemsHandler.NAMESPACE_DISCO_ITEMS);
-        } else {
-            // don't known what to do with this.
-            replyPacket = IQ.createResultIQ(iq);
-            replyPacket.setError(Condition.feature_not_implemented);
+        switch (namespace) {
+            case NAMESPACE_JABBER_IQ_SEARCH:
+                replyPacket = handleSearchRequest(iq);
+                break;
+            case IQDiscoInfoHandler.NAMESPACE_DISCO_INFO:
+                replyPacket = handleDiscoInfo(iq);
+                break;
+            case IQDiscoItemsHandler.NAMESPACE_DISCO_ITEMS:
+                replyPacket = IQ.createResultIQ(iq);
+                replyPacket.setChildElement("query", IQDiscoItemsHandler.NAMESPACE_DISCO_ITEMS);
+                break;
+            default:
+                // don't known what to do with this.
+                replyPacket = IQ.createResultIQ(iq);
+                replyPacket.setError(Condition.feature_not_implemented);
+                break;
         }
 
         return replyPacket;
@@ -784,19 +790,22 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
             // return to the client the same fields that were submitted
             for (String field : reverseFieldLookup.keySet()) {
-                if ("Username".equals(field)) {
-                    Element element = item.addElement(reverseFieldLookup.get(field));
-                    element.addText(username);
-                }
-
-                if ("Name".equals(field)) {
-                    Element element = item.addElement(reverseFieldLookup.get(field));
-                    element.addText(user.isNameVisible() ? removeNull(user.getName()) : "");
-                }
-
-                if ("Email".equals(field)) {
-                    Element element = item.addElement(reverseFieldLookup.get(field));
-                    element.addText(user.isEmailVisible() ? removeNull(user.getEmail()) : "");
+                switch (field) {
+                    case "Username": {
+                        Element element = item.addElement(reverseFieldLookup.get(field));
+                        element.addText(username);
+                        break;
+                    }
+                    case "Name": {
+                        Element element = item.addElement(reverseFieldLookup.get(field));
+                        element.addText(user.isNameVisible() ? removeNull(user.getName()) : "");
+                        break;
+                    }
+                    case "Email": {
+                        Element element = item.addElement(reverseFieldLookup.get(field));
+                        element.addText(user.isEmailVisible() ? removeNull(user.getEmail()) : "");
+                        break;
+                    }
                 }
             }
         }
@@ -843,7 +852,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      */
     public void setServiceEnabled(boolean enabled) {
         serviceEnabled = enabled;
-        JiveGlobals.setProperty(SERVICEENABLED, enabled ? "true" : "false");
+        JiveGlobals.setProperty(SERVICEENABLED, Boolean.toString(enabled));
     }
 
     /**
@@ -897,7 +906,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      */
     public void setGroupOnly(boolean groupOnly) {
         this.groupOnly = groupOnly;
-        JiveGlobals.setProperty(GROUPONLY, groupOnly ? "true" : "false");
+        JiveGlobals.setProperty(GROUPONLY, Boolean.toString(groupOnly));
     }
 
     /*
@@ -906,14 +915,19 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @see org.jivesoftware.util.PropertyEventListener#propertySet(java.lang.String, java.util.Map)
      */
     public void propertySet(String property, Map<String, Object> params) {
-        if (property.equals(SERVICEENABLED)) {
-            this.serviceEnabled = Boolean.parseBoolean((String) params.get("value"));
-        } else if (property.equals(SERVICENAME)) {
-            changeServiceName((String) params.get("value"));
-        } else if (property.equals(EXCLUDEDFIELDS)) {
-            excludedFields = StringUtils.stringToCollection(JiveGlobals.getProperty(EXCLUDEDFIELDS, (String) params.get("value")));
-        } else if (property.equals(GROUPONLY)) {
-            this.groupOnly = Boolean.parseBoolean((String) params.get("value"));
+        switch (property) {
+            case SERVICEENABLED:
+                this.serviceEnabled = Boolean.parseBoolean((String) params.get("value"));
+                break;
+            case SERVICENAME:
+                changeServiceName((String) params.get("value"));
+                break;
+            case EXCLUDEDFIELDS:
+                excludedFields = StringUtils.stringToCollection(JiveGlobals.getProperty(EXCLUDEDFIELDS, (String) params.get("value")));
+                break;
+            case GROUPONLY:
+                this.groupOnly = Boolean.parseBoolean((String) params.get("value"));
+                break;
         }
     }
 
@@ -923,14 +937,19 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @see org.jivesoftware.util.PropertyEventListener#propertyDeleted(java.lang.String, java.util.Map)
      */
     public void propertyDeleted(String property, Map<String, Object> params) {
-        if (property.equals(SERVICEENABLED)) {
-            this.serviceEnabled = true;
-        } else if (property.equals(SERVICENAME)) {
-            changeServiceName("search");
-        } else if (property.equals(EXCLUDEDFIELDS)) {
-            excludedFields = new ArrayList<String>();
-        } else if (property.equals(GROUPONLY)) {
-            this.groupOnly = false;
+        switch (property) {
+            case SERVICEENABLED:
+                this.serviceEnabled = true;
+                break;
+            case SERVICENAME:
+                changeServiceName("search");
+                break;
+            case EXCLUDEDFIELDS:
+                excludedFields = new ArrayList<>();
+                break;
+            case GROUPONLY:
+                this.groupOnly = false;
+                break;
         }
     }
 
@@ -977,14 +996,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         this.serviceName = serviceName;
     }
 
-    /**
-     * Comparator that compares String objects, ignoring capitalization.
-     */
-    private class CaseInsensitiveComparator implements Comparator<String> {
-        public int compare(String s1, String s2) {
-            return s1.compareToIgnoreCase(s2);
-        }
-    }
 
     /**
      * Returns the trimmed argument, or an empty String object of null was supplied as an argument.
