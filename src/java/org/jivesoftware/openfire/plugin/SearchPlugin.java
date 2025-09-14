@@ -665,9 +665,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         // since not all clients request which fields are available for
         // searching attempt to match submitted fields with available search
         // fields
-        Iterator<Element> iter = incomingForm.elementIterator();
-        while (iter.hasNext()) {
-            Element element = iter.next();
+        for (Element element : incomingForm.elements()) {
             String name = element.getName();
 
             if (fieldLookup.containsKey(name)) {
@@ -698,10 +696,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         List<String> searchFields = new ArrayList<String>();
         String search = "";
 
-        Iterator<Element> fields = dataform.elementIterator("field");
-        while (fields.hasNext()) {
-            Element searchField = fields.next();
-
+        for (Element searchField : dataform.elements("field")) {
             String field = searchField.attributeValue("var");
             String value = "";
             if (searchField.element("value") != null) {
