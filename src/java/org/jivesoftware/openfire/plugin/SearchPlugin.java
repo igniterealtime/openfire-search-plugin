@@ -301,7 +301,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
                 replyPacket.setChildElement("query", IQDiscoItemsHandler.NAMESPACE_DISCO_ITEMS);
                 break;
             default:
-                // don't known what to do with this.
+                // don't know what to do with this.
                 replyPacket = IQ.createResultIQ(iq);
                 replyPacket.setError(Condition.feature_not_implemented);
                 break;
@@ -380,7 +380,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @param packet
      *            An IQ stanza of type 'get'
-     * @return A result IQ stanza that contains the possbile search fields.
+     * @return A result IQ stanza that contains the possible search fields.
      */
     private IQ processGetPacket(IQ packet) {
         if (!packet.getType().equals(IQ.Type.get)) {
@@ -428,7 +428,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @param packet
      *            An IQ stanza of type 'get'
-     * @return A result IQ stanza that contains the possbile search fields.
+     * @return A result IQ stanza that contains the possible search fields.
      */
     private IQ processSetPacket(IQ packet) {
         if (!packet.getType().equals(IQ.Type.set)) {
@@ -448,22 +448,14 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
         final Element incomingForm = packet.getChildElement();
         final boolean isDataFormQuery = (incomingForm.element(QName.get("x", "jabber:x:data")) != null);
-
+        // XEP-0059 Result Set Management
         final Element rsmElement = incomingForm.element(QName.get("set", ResultSet.NAMESPACE_RESULT_SET_MANAGEMENT));
 
         if (rsmElement != null) {
-            final Element maxElement = rsmElement.element("max");
             final Element startIndexElement = rsmElement.element("index");
-
-            int startIndex = 0;
-            if (startIndexElement != null) {
-                startIndex = Integer.parseInt(startIndexElement.getTextTrim());
-            }
-
-            int max = -1;
-            if (maxElement != null) {
-                max = Integer.parseInt(maxElement.getTextTrim());
-            }
+            int startIndex = startIndexElement != null ? Integer.parseInt(startIndexElement.getTextTrim()) : 0;
+            final Element maxElement = rsmElement.element("max");
+            int max = maxElement != null ? Integer.parseInt(maxElement.getTextTrim()) : -1;
 
             final Set<User> searchResults = performSearch(incomingForm, startIndex, max);
 
@@ -549,14 +541,13 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * <ul>
      * <li>if the IQ stanza is of type 'set';</li>
      * <li>if a child element identified by the jabber:iq:search namespace is supplied;</li>
-     * <li>if the stanza child element is has valid children itself.</li>
+     * <li>if the stanza child element has a valid children itself.</li>
      * </ul>
      * 
      * @param iq
      *            The IQ object that should include a jabber:iq:search request.
      * @return ''true'' if the supplied IQ stanza is a spec compliant search request, ''false'' otherwise.
      */
-    @SuppressWarnings("unchecked")
     public static boolean isValidSearchRequest(IQ iq) {
 
         if (iq == null) {
@@ -637,10 +628,10 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     }
 
     /**
-     * This utilty method extracts the search query from the request. A query is defined as a set of key->value pairs, where the key denotes
+     * This utility method extracts the search query from the request. A query is defined as a set of key->value pairs, where the key denotes
      * a search field, and the value contains the value that was filled out by the user for that field.
      * 
-     * The query can be specified in one of two ways. The first way is a query is formed is by filling out any of the the standard search
+     * The query can be specified in one of two ways. The first way is a query is formed is by filling out any of the standard search
      * fields. The other search method makes use of extended data forms. Search queries that are supplied to this
      * {@link #extractSearchQuery(Element)} that make use of this last method get forwarded to {@link #extractExtendedSearchQuery(Element)}.
      * 
@@ -648,7 +639,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      *            The form from which to extract the query
      * @return The search query for a particular user search request.
      */
-    @SuppressWarnings("unchecked")
     private Map<String, String> extractSearchQuery(Element incomingForm) {
         if (incomingForm.element(QName.get("x", "jabber:x:data")) != null) {
             // forward the request.
@@ -664,7 +654,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
             String name = element.getName();
 
             if (fieldLookup.containsKey(name)) {
-                // make best effort to map the fields submitted by
+                // make the best effort to map the fields submitted by
                 // the client to those that Openfire can search
                 reverseFieldLookup.put(fieldLookup.get(name), name);
                 searchList.put(fieldLookup.get(name), element.getText());
@@ -683,7 +673,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @return The search query for a particular user search request.
      * @see #extractSearchQuery(Element)
      */
-    @SuppressWarnings("unchecked")
     private Map<String, String> extractExtendedSearchQuery(Element incomingForm) {
         final Element dataform = incomingForm.element(QName.get("x", "jabber:x:data"));
 
@@ -816,7 +805,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     }
 
     /**
-     * Sets the service name of this component, which is "search" by default. If the name is different than the existing name the plugin
+     * Sets the service name of this component, which is "search" by default. If the name is different from the existing name the plugin
      * will remove itself from the ComponentManager and then add itself back using the new name.
      * 
      * @param name
@@ -1007,7 +996,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
     /**
      * Returns the collection of field names that can be used to search for a user. Typical fields are username, name, and email. These
-     * values can be used to contruct a data form.
+     * values can be used to construct a data form.
      * 
      * @return the collection of field names that can be used to search.
      */
