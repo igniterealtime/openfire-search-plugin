@@ -10,6 +10,12 @@
     <artifactId>search</artifactId>
     <version>1.7.6-SNAPSHOT</version>
     <name>Search</name>
+    <description>Provides support for Jabber Search (XEP-0055)</description>
+    <developers>
+        <developer>
+            <name>Ryan Graham</name>
+        </developer>
+    </developers>
 
     <repositories>
         <!-- Where we obtain dependencies. -->
@@ -22,7 +28,11 @@
             </snapshots>
         </repository>
     </repositories>
-
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Use static build timestamp for reproducible builds -->
+        <project.build.outputTimestamp>1980-02-01T00:00:00Z</project.build.outputTimestamp>
+    </properties>
     <build>
         <sourceDirectory>src/java</sourceDirectory>
         <plugins>
