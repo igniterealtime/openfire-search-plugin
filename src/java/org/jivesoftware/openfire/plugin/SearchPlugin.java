@@ -732,23 +732,27 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         searchResults.addReportedField("jid", "JID", FormField.Type.jid_single);
 
         for (final String fieldName : getFilteredSearchFields()) {
+            String fieldLabel = LocaleUtils.getLocalizedString("advance.user.search." + fieldName.toLowerCase(), "search");
             searchResults.addReportedField(fieldName,
-                    LocaleUtils.getLocalizedString("advance.user.search." + fieldName.toLowerCase(), "search"), FormField.Type.text_single);
+                fieldLabel, FormField.Type.text_single);
         }
 
         for (final User user : users) {
             final String username = JID.unescapeNode(user.getUsername());
+            String jid = username + "@" + serverName;
+            String name = user.isNameVisible() ? removeNull(user.getName()) : "";
+            String email = user.isEmailVisible() ? removeNull(user.getEmail()) : "";
 
             final LinkedHashMap<String, Object> item = new  LinkedHashMap<String, Object>();
-            item.put("jid", username + "@" + serverName);
+            item.put("jid", jid);
 
             item.put(LocaleUtils.getLocalizedString("advance.user.search.username", "search"), username);
 
             item.put(LocaleUtils.getLocalizedString("advance.user.search.name", "search"),
-                    (user.isNameVisible() ? removeNull(user.getName()) : ""));
+                name);
 
             item.put(LocaleUtils.getLocalizedString("advance.user.search.email", "search"),
-                    (user.isEmailVisible() ? removeNull(user.getEmail()) : ""));
+                email);
 
             searchResults.addItemFields(item);
         }
@@ -776,7 +780,10 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         for (User user : users) {
             Element item = replyQuery.addElement("item");
             String username = JID.unescapeNode(user.getUsername());
-            item.addAttribute("jid", username + "@" + serverName);
+            String jid = username + "@" + serverName;
+            String name = user.isNameVisible() ? removeNull(user.getName()) : "";
+            String email = user.isEmailVisible() ? removeNull(user.getEmail()) : "";
+            item.addAttribute("jid", jid);
 
             // return to the client the same fields that were submitted
             for (String field : reverseFieldLookup.keySet()) {
@@ -788,12 +795,12 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
                     }
                     case "Name": {
                         Element element = item.addElement(reverseFieldLookup.get(field));
-                        element.addText(user.isNameVisible() ? removeNull(user.getName()) : "");
+                        element.addText(name);
                         break;
                     }
                     case "Email": {
                         Element element = item.addElement(reverseFieldLookup.get(field));
-                        element.addText(user.isEmailVisible() ? removeNull(user.getEmail()) : "");
+                        element.addText(email);
                         break;
                     }
                 }
@@ -848,7 +855,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     /**
      * Returns the collection of searchable field names that does not include the fields listed in the EXCLUDEDFIELDS property list.
      * 
-     * @return collection of searchable field names.
+     * @return collection of searchable field names e.g. "Username", "Name", "Email".
      */
     public Collection<String> getFilteredSearchFields() {
         Collection<String> searchFields;
