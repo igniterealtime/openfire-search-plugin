@@ -20,13 +20,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -35,6 +34,7 @@ import java.util.TreeMap;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.QName;
+import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
@@ -92,7 +92,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
     private UserManager userManager;
     private ComponentManager componentManager;
-    private PluginManager pluginManager;
 
     private String serviceName;
     private boolean serviceEnabled;
@@ -100,7 +99,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
     private boolean groupOnly;
 
-    private static String serverName;
+    private String serverName;
 
     private TreeMap<String, String> fieldLookup = new TreeMap<>(CASE_INSENSITIVE_ORDER);
     private Map<String, String> reverseFieldLookup = new HashMap<String, String>();
@@ -144,6 +143,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#getName()
      */
+    @Override
     public String getName() {
         return PluginMetadataHelper.getName(this);
     }
@@ -153,6 +153,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#getDescription()
      */
+    @Override
     public String getDescription() {
         return PluginMetadataHelper.getDescription(this);
     }
@@ -162,9 +163,8 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.jivesoftware.openfire.container.Plugin#initializePlugin(org.jivesoftware.openfire.container.PluginManager, java.io.File)
      */
+    @Override
     public void initializePlugin(PluginManager manager, File pluginDirectory) {
-        pluginManager = manager;
-
         componentManager = ComponentManagerFactory.getComponentManager();
         try {
             componentManager.addComponent(serviceName, this);
@@ -179,6 +179,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#initialize(org.xmpp.packet.JID, org.xmpp.component.ComponentManager)
      */
+    @Override
     public void initialize(JID jid, ComponentManager componentManager) {
     }
 
@@ -187,6 +188,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#start()
      */
+    @Override
     public void start() {
     }
 
@@ -195,9 +197,9 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.jivesoftware.openfire.container.Plugin#destroyPlugin()
      */
+    @Override
     public void destroyPlugin() {
         PropertyEventDispatcher.removeListener(this);
-        pluginManager = null;
         try {
             componentManager.removeComponent(serviceName);
             componentManager = null;
@@ -219,6 +221,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#shutdown()
      */
+    @Override
     public void shutdown() {
     }
 
@@ -227,6 +230,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#processPacket(org.xmpp.packet.Packet)
      */
+    @Override
     public void processPacket(Packet p) {
         if (!(p instanceof IQ)) {
             return;
@@ -297,7 +301,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
                 replyPacket.setChildElement("query", IQDiscoItemsHandler.NAMESPACE_DISCO_ITEMS);
                 break;
             default:
-                // don't known what to do with this.
+                // don't know what to do with this.
                 replyPacket = IQ.createResultIQ(iq);
                 replyPacket.setError(Condition.feature_not_implemented);
                 break;
@@ -376,17 +380,18 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @param packet
      *            An IQ stanza of type 'get'
-     * @return A result IQ stanza that contains the possbile search fields.
+     * @return A result IQ stanza that contains the possible search fields.
      */
     private IQ processGetPacket(IQ packet) {
         if (!packet.getType().equals(IQ.Type.get)) {
             throw new IllegalArgumentException("This method only accepts 'get' typed IQ stanzas as an argument.");
         }
+        Locale preferredLocale = SessionManager.getInstance().getLocaleForSession(packet.getFrom());
         IQ replyPacket = IQ.createResultIQ(packet);
 
         Element queryResult = DocumentHelper.createElement(QName.get("query", NAMESPACE_JABBER_IQ_SEARCH));
 
-        String instructions = LocaleUtils.getLocalizedString("advance.user.search.details", "search");
+        String instructions = LocaleUtils.getLocalizedString("advance.user.search.details", "search", null, preferredLocale, false);
 
         // non-data form
         queryResult.addElement("instructions").addText(instructions);
@@ -396,12 +401,13 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         queryResult.addElement("email");
 
         DataForm searchForm = new DataForm(DataForm.Type.form);
-        searchForm.setTitle(LocaleUtils.getLocalizedString("advance.user.search.title", "search"));
+        searchForm.setTitle(LocaleUtils.getLocalizedString("advance.user.search.title", "search", null, preferredLocale, false));
         searchForm.addInstruction(instructions);
 
         searchForm.addField("FORM_TYPE", null, FormField.Type.hidden).addValue(NAMESPACE_JABBER_IQ_SEARCH);
 
-        searchForm.addField("search", LocaleUtils.getLocalizedString("advance.user.search.search", "search"), FormField.Type.text_single)
+        String searchFieldLabel = LocaleUtils.getLocalizedString("advance.user.search.search", "search", null, preferredLocale, false);
+        searchForm.addField("search", searchFieldLabel, FormField.Type.text_single)
                 .setRequired(true);
 
         for (String searchField : getFilteredSearchFields()) {
@@ -409,7 +415,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
             field.setVariable(searchField);
             field.setType(FormField.Type.boolean_type);
             field.addValue("1");
-            field.setLabel(LocaleUtils.getLocalizedString("advance.user.search." + searchField.toLowerCase(), "search"));
+            field.setLabel(LocaleUtils.getLocalizedString("advance.user.search." + searchField.toLowerCase(), "search", null, preferredLocale, false));
             field.setRequired(false);
         }
 
@@ -424,7 +430,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @param packet
      *            An IQ stanza of type 'get'
-     * @return A result IQ stanza that contains the possbile search fields.
+     * @return A result IQ stanza that contains the possible search fields.
      */
     private IQ processSetPacket(IQ packet) {
         if (!packet.getType().equals(IQ.Type.set)) {
@@ -444,22 +450,14 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
         final Element incomingForm = packet.getChildElement();
         final boolean isDataFormQuery = (incomingForm.element(QName.get("x", "jabber:x:data")) != null);
-
+        // XEP-0059 Result Set Management
         final Element rsmElement = incomingForm.element(QName.get("set", ResultSet.NAMESPACE_RESULT_SET_MANAGEMENT));
 
         if (rsmElement != null) {
-            final Element maxElement = rsmElement.element("max");
             final Element startIndexElement = rsmElement.element("index");
-
-            int startIndex = 0;
-            if (startIndexElement != null) {
-                startIndex = Integer.parseInt(startIndexElement.getTextTrim());
-            }
-
-            int max = -1;
-            if (maxElement != null) {
-                max = Integer.parseInt(maxElement.getTextTrim());
-            }
+            int startIndex = startIndexElement != null ? Integer.parseInt(startIndexElement.getTextTrim()) : 0;
+            final Element maxElement = rsmElement.element("max");
+            int max = maxElement != null ? Integer.parseInt(maxElement.getTextTrim()) : -1;
 
             final Set<User> searchResults = performSearch(incomingForm, startIndex, max);
 
@@ -545,14 +543,13 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * <ul>
      * <li>if the IQ stanza is of type 'set';</li>
      * <li>if a child element identified by the jabber:iq:search namespace is supplied;</li>
-     * <li>if the stanza child element is has valid children itself.</li>
+     * <li>if the stanza child element has a valid children itself.</li>
      * </ul>
      * 
      * @param iq
      *            The IQ object that should include a jabber:iq:search request.
      * @return ''true'' if the supplied IQ stanza is a spec compliant search request, ''false'' otherwise.
      */
-    @SuppressWarnings("unchecked")
     public static boolean isValidSearchRequest(IQ iq) {
 
         if (iq == null) {
@@ -604,29 +601,20 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     private Set<User> performSearch(Element incomingForm, int startIndex, int max) {
         Set<User> users = new HashSet<User>();
 
-        Hashtable<String, String> searchList = extractSearchQuery(incomingForm);
-
+        Map<String, String> searchList = extractSearchQuery(incomingForm);
         for (Entry<String, String> entry : searchList.entrySet()) {
             String field = entry.getKey();
             String query = entry.getValue();
-
-            Collection<User> foundUsers = new ArrayList<User>();
-
-            if (userManager != null && query.length() > 0 && !query.equals(NAMESPACE_JABBER_IQ_SEARCH)) {
+            if (!query.isEmpty() && !query.equals(NAMESPACE_JABBER_IQ_SEARCH)) {
                 if (max >= 0) {
-                    foundUsers.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query, startIndex, max));
+                    users.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query, startIndex, max));
                 } else {
-                    foundUsers.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query));
-                }
-            }
-
-            // occasionally a null User is returned so filter them out
-            for (User user : foundUsers) {
-                if (user != null) {
-                    users.add(user);
+                    users.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query));
                 }
             }
         }
+        // occasionally a null User is returned so filter them out
+        users.remove(null);
         return users;
     }
 
@@ -642,10 +630,10 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     }
 
     /**
-     * This utilty method extracts the search query from the request. A query is defined as a set of key->value pairs, where the key denotes
+     * This utility method extracts the search query from the request. A query is defined as a set of key->value pairs, where the key denotes
      * a search field, and the value contains the value that was filled out by the user for that field.
      * 
-     * The query can be specified in one of two ways. The first way is a query is formed is by filling out any of the the standard search
+     * The query can be specified in one of two ways. The first way is a query is formed is by filling out any of the standard search
      * fields. The other search method makes use of extended data forms. Search queries that are supplied to this
      * {@link #extractSearchQuery(Element)} that make use of this last method get forwarded to {@link #extractExtendedSearchQuery(Element)}.
      * 
@@ -653,8 +641,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      *            The form from which to extract the query
      * @return The search query for a particular user search request.
      */
-    @SuppressWarnings("unchecked")
-    private Hashtable<String, String> extractSearchQuery(Element incomingForm) {
+    private Map<String, String> extractSearchQuery(Element incomingForm) {
         if (incomingForm.element(QName.get("x", "jabber:x:data")) != null) {
             // forward the request.
             return extractExtendedSearchQuery(incomingForm);
@@ -669,7 +656,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
             String name = element.getName();
 
             if (fieldLookup.containsKey(name)) {
-                // make best effort to map the fields submitted by
+                // make the best effort to map the fields submitted by
                 // the client to those that Openfire can search
                 reverseFieldLookup.put(fieldLookup.get(name), name);
                 searchList.put(fieldLookup.get(name), element.getText());
@@ -688,8 +675,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @return The search query for a particular user search request.
      * @see #extractSearchQuery(Element)
      */
-    @SuppressWarnings("unchecked")
-    private Hashtable<String, String> extractExtendedSearchQuery(Element incomingForm) {
+    private Map<String, String> extractExtendedSearchQuery(Element incomingForm) {
         final Element dataform = incomingForm.element(QName.get("x", "jabber:x:data"));
 
         Hashtable<String, String> searchList = new Hashtable<String, String>();
@@ -730,30 +716,34 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @return the iq packet that contains the search results
      */
     private IQ replyDataFormResult(Collection<User> users, IQ packet) {
+        Locale preferredLocale = SessionManager.getInstance().getLocaleForSession(packet.getFrom());
         final DataForm searchResults = new DataForm(DataForm.Type.result);
 
-        searchResults.addField("FORM_TYPE", null, FormField.Type.hidden);
+        searchResults.addField("FORM_TYPE", null, FormField.Type.hidden)
+            .addValue(NAMESPACE_JABBER_IQ_SEARCH);
 
-        searchResults.addReportedField("jid", "JID", FormField.Type.jid_single);
+        String fieldLabelJid = LocaleUtils.getLocalizedString("advance.user.search.jid", "search", null, preferredLocale, false);
+        searchResults.addReportedField("jid", fieldLabelJid, FormField.Type.jid_single);
+        String fieldLabelEmail = LocaleUtils.getLocalizedString("advance.user.search.email", "search", null, preferredLocale, false);
+        searchResults.addReportedField("email", fieldLabelEmail, FormField.Type.text_single);
 
         for (final String fieldName : getFilteredSearchFields()) {
+            String fieldLabel = LocaleUtils.getLocalizedString("advance.user.search." + fieldName.toLowerCase(), "search", null, preferredLocale, false);
             searchResults.addReportedField(fieldName,
-                    LocaleUtils.getLocalizedString("advance.user.search." + fieldName.toLowerCase(), "search"), FormField.Type.text_single);
+                fieldLabel, FormField.Type.text_single);
         }
 
         for (final User user : users) {
             final String username = JID.unescapeNode(user.getUsername());
+            String jid = username + "@" + serverName;
+            String name = user.isNameVisible() ? removeNull(user.getName()) : "";
+            String email = user.isEmailVisible() ? removeNull(user.getEmail()) : "";
 
             final LinkedHashMap<String, Object> item = new  LinkedHashMap<String, Object>();
-            item.put("jid", username + "@" + serverName);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.username", "search"), username);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.name", "search"),
-                    (user.isNameVisible() ? removeNull(user.getName()) : ""));
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.email", "search"),
-                    (user.isEmailVisible() ? removeNull(user.getEmail()) : ""));
+            item.put("jid", jid);
+            item.put("Username", username);
+            item.put("Name", name);
+            item.put("Email", email);
 
             searchResults.addItemFields(item);
         }
@@ -781,7 +771,10 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         for (User user : users) {
             Element item = replyQuery.addElement("item");
             String username = JID.unescapeNode(user.getUsername());
-            item.addAttribute("jid", username + "@" + serverName);
+            String jid = username + "@" + serverName;
+            String name = user.isNameVisible() ? removeNull(user.getName()) : "";
+            String email = user.isEmailVisible() ? removeNull(user.getEmail()) : "";
+            item.addAttribute("jid", jid);
 
             // return to the client the same fields that were submitted
             for (String field : reverseFieldLookup.keySet()) {
@@ -793,12 +786,12 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
                     }
                     case "Name": {
                         Element element = item.addElement(reverseFieldLookup.get(field));
-                        element.addText(user.isNameVisible() ? removeNull(user.getName()) : "");
+                        element.addText(name);
                         break;
                     }
                     case "Email": {
                         Element element = item.addElement(reverseFieldLookup.get(field));
-                        element.addText(user.isEmailVisible() ? removeNull(user.getEmail()) : "");
+                        element.addText(email);
                         break;
                     }
                 }
@@ -818,7 +811,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     }
 
     /**
-     * Sets the service name of this component, which is "search" by default. If the name is different than the existing name the plugin
+     * Sets the service name of this component, which is "search" by default. If the name is different from the existing name the plugin
      * will remove itself from the ComponentManager and then add itself back using the new name.
      * 
      * @param name
@@ -853,7 +846,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     /**
      * Returns the collection of searchable field names that does not include the fields listed in the EXCLUDEDFIELDS property list.
      * 
-     * @return collection of searchable field names.
+     * @return collection of searchable field names e.g. "Username", "Name", "Email".
      */
     public Collection<String> getFilteredSearchFields() {
         Collection<String> searchFields;
@@ -1009,7 +1002,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
     /**
      * Returns the collection of field names that can be used to search for a user. Typical fields are username, name, and email. These
-     * values can be used to contruct a data form.
+     * values can be used to construct a data form.
      * 
      * @return the collection of field names that can be used to search.
      */
