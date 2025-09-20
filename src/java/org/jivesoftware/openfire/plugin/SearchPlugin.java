@@ -20,13 +20,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -35,6 +34,7 @@ import java.util.TreeMap;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.QName;
+import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
@@ -386,11 +386,12 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         if (!packet.getType().equals(IQ.Type.get)) {
             throw new IllegalArgumentException("This method only accepts 'get' typed IQ stanzas as an argument.");
         }
+        Locale preferredLocale = SessionManager.getInstance().getLocaleForSession(packet.getFrom());
         IQ replyPacket = IQ.createResultIQ(packet);
 
         Element queryResult = DocumentHelper.createElement(QName.get("query", NAMESPACE_JABBER_IQ_SEARCH));
 
-        String instructions = LocaleUtils.getLocalizedString("advance.user.search.details", "search");
+        String instructions = LocaleUtils.getLocalizedString("advance.user.search.details", "search", null, preferredLocale, false);
 
         // non-data form
         queryResult.addElement("instructions").addText(instructions);
@@ -400,12 +401,13 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         queryResult.addElement("email");
 
         DataForm searchForm = new DataForm(DataForm.Type.form);
-        searchForm.setTitle(LocaleUtils.getLocalizedString("advance.user.search.title", "search"));
+        searchForm.setTitle(LocaleUtils.getLocalizedString("advance.user.search.title", "search", null, preferredLocale, false));
         searchForm.addInstruction(instructions);
 
         searchForm.addField("FORM_TYPE", null, FormField.Type.hidden).addValue(NAMESPACE_JABBER_IQ_SEARCH);
 
-        searchForm.addField("search", LocaleUtils.getLocalizedString("advance.user.search.search", "search"), FormField.Type.text_single)
+        String searchFieldLabel = LocaleUtils.getLocalizedString("advance.user.search.search", "search", null, preferredLocale, false);
+        searchForm.addField("search", searchFieldLabel, FormField.Type.text_single)
                 .setRequired(true);
 
         for (String searchField : getFilteredSearchFields()) {
@@ -413,7 +415,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
             field.setVariable(searchField);
             field.setType(FormField.Type.boolean_type);
             field.addValue("1");
-            field.setLabel(LocaleUtils.getLocalizedString("advance.user.search." + searchField.toLowerCase(), "search"));
+            field.setLabel(LocaleUtils.getLocalizedString("advance.user.search." + searchField.toLowerCase(), "search", null, preferredLocale, false));
             field.setRequired(false);
         }
 
@@ -714,15 +716,18 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @return the iq packet that contains the search results
      */
     private IQ replyDataFormResult(Collection<User> users, IQ packet) {
+        Locale preferredLocale = SessionManager.getInstance().getLocaleForSession(packet.getFrom());
         final DataForm searchResults = new DataForm(DataForm.Type.result);
 
         searchResults.addField("FORM_TYPE", null, FormField.Type.hidden)
             .addValue(NAMESPACE_JABBER_IQ_SEARCH);
 
         searchResults.addReportedField("jid", "JID", FormField.Type.jid_single);
+        String fieldLabelEmail = LocaleUtils.getLocalizedString("advance.user.search.email", "search", null, preferredLocale, false);
+        searchResults.addReportedField("email", fieldLabelEmail, FormField.Type.text_single);
 
         for (final String fieldName : getFilteredSearchFields()) {
-            String fieldLabel = LocaleUtils.getLocalizedString("advance.user.search." + fieldName.toLowerCase(), "search");
+            String fieldLabel = LocaleUtils.getLocalizedString("advance.user.search." + fieldName.toLowerCase(), "search", null, preferredLocale, false);
             searchResults.addReportedField(fieldName,
                 fieldLabel, FormField.Type.text_single);
         }
