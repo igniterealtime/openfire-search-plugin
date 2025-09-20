@@ -605,28 +605,19 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         Set<User> users = new HashSet<User>();
 
         Map<String, String> searchList = extractSearchQuery(incomingForm);
-
         for (Entry<String, String> entry : searchList.entrySet()) {
             String field = entry.getKey();
             String query = entry.getValue();
-
-            Collection<User> foundUsers = new ArrayList<User>();
-
             if (userManager != null && query.length() > 0 && !query.equals(NAMESPACE_JABBER_IQ_SEARCH)) {
                 if (max >= 0) {
-                    foundUsers.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query, startIndex, max));
+                    users.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query, startIndex, max));
                 } else {
-                    foundUsers.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query));
-                }
-            }
-
-            // occasionally a null User is returned so filter them out
-            for (User user : foundUsers) {
-                if (user != null) {
-                    users.add(user);
+                    users.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query));
                 }
             }
         }
+        // occasionally a null User is returned so filter them out
+        users.remove(null);
         return users;
     }
 
