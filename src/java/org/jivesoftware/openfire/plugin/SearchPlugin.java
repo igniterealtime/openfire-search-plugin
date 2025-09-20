@@ -745,14 +745,9 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
             final LinkedHashMap<String, Object> item = new  LinkedHashMap<String, Object>();
             item.put("jid", jid);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.username", "search"), username);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.name", "search"),
-                name);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.email", "search"),
-                email);
+            item.put("Username", username);
+            item.put("Name", name);
+            item.put("Email", email);
 
             searchResults.addItemFields(item);
         }
