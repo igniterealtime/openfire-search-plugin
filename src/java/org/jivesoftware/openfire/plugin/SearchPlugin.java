@@ -17,20 +17,8 @@
 package org.jivesoftware.openfire.plugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -744,16 +732,16 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         for (final User user : users) {
             final String username = JID.unescapeNode(user.getUsername());
 
-            final LinkedHashMap<String, Object> item = new  LinkedHashMap<String, Object>();
+            searchResults.addReportedField("jid", LocaleUtils.getLocalizedString("advance.user.search.jid", "search"), FormField.Type.jid_single );
+            searchResults.addReportedField("username", LocaleUtils.getLocalizedString("advance.user.search.username", "search"), FormField.Type.text_single );
+            searchResults.addReportedField("name", LocaleUtils.getLocalizedString("advance.user.search.name", "search"), FormField.Type.text_single );
+            searchResults.addReportedField("email", LocaleUtils.getLocalizedString("advance.user.search.email", "search"), FormField.Type.text_single );
+
+            final LinkedHashMap<String, Object> item = new  LinkedHashMap<>();
             item.put("jid", username + "@" + serverName);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.username", "search"), username);
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.name", "search"),
-                    (user.isNameVisible() ? removeNull(user.getName()) : ""));
-
-            item.put(LocaleUtils.getLocalizedString("advance.user.search.email", "search"),
-                    (user.isEmailVisible() ? removeNull(user.getEmail()) : ""));
+            item.put("username", username);
+            item.put("name", (user.isNameVisible() ? removeNull(user.getName()) : ""));
+            item.put("email", (user.isEmailVisible() ? removeNull(user.getEmail()) : ""));
 
             searchResults.addItemFields(item);
         }
