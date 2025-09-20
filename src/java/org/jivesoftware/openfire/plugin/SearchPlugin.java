@@ -99,7 +99,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
     private boolean groupOnly;
 
-    private static String serverName;
+    private String serverName;
 
     private TreeMap<String, String> fieldLookup = new TreeMap<>(CASE_INSENSITIVE_ORDER);
     private Map<String, String> reverseFieldLookup = new HashMap<String, String>();
