@@ -153,7 +153,7 @@
                 <th nowrap><fmt:message key="advance.user.search.name"/></th>
                 <th nowrap><fmt:message key="advance.user.search.created"/></th>
                 <th nowrap><fmt:message key="advance.user.search.last-logout"/></th>
-                <!-- Don't allow editing or deleting if users are read-only. -->
+                <%-- Don't allow editing or deleting if users are read-only. --%>
                 <c:if test="${not readOnly}">
                     <th nowrap><fmt:message key="advance.user.search.edit"/></th>
                     <th nowrap><fmt:message key="advance.user.search.delete"/></th>
@@ -241,7 +241,7 @@
 <%--                                    </c:otherwise>--%>
 <%--                                </c:choose>--%>
 <%--                            </td>--%>
-                            <!-- Don't allow editing or deleting if users are read-only. -->
+                            <%-- Don't allow editing or deleting if users are read-only. --%>
                             <c:if test="${not readOnly}">
                                 <td width="1%" align="center">
                                     <a href="../../user-edit-form.jsp?username=${admin:urlEncode(user.username)}" title="<fmt:message key="global.click_edit" />"><img src="images/edit-16x16.gif" width="17" height="17" border="0"></a>
