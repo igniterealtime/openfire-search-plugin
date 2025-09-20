@@ -143,6 +143,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#getName()
      */
+    @Override
     public String getName() {
         return PluginMetadataHelper.getName(this);
     }
@@ -152,6 +153,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#getDescription()
      */
+    @Override
     public String getDescription() {
         return PluginMetadataHelper.getDescription(this);
     }
@@ -161,6 +163,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.jivesoftware.openfire.container.Plugin#initializePlugin(org.jivesoftware.openfire.container.PluginManager, java.io.File)
      */
+    @Override
     public void initializePlugin(PluginManager manager, File pluginDirectory) {
         componentManager = ComponentManagerFactory.getComponentManager();
         try {
@@ -176,6 +179,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#initialize(org.xmpp.packet.JID, org.xmpp.component.ComponentManager)
      */
+    @Override
     public void initialize(JID jid, ComponentManager componentManager) {
     }
 
@@ -184,6 +188,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#start()
      */
+    @Override
     public void start() {
     }
 
@@ -192,6 +197,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.jivesoftware.openfire.container.Plugin#destroyPlugin()
      */
+    @Override
     public void destroyPlugin() {
         PropertyEventDispatcher.removeListener(this);
         try {
@@ -215,6 +221,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#shutdown()
      */
+    @Override
     public void shutdown() {
     }
 
@@ -223,6 +230,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * 
      * @see org.xmpp.component.Component#processPacket(org.xmpp.packet.Packet)
      */
+    @Override
     public void processPacket(Packet p) {
         if (!(p instanceof IQ)) {
             return;
