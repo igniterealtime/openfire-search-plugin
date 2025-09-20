@@ -11,11 +11,26 @@
     <version>1.7.6-SNAPSHOT</version>
     <name>Search</name>
     <description>Provides support for Jabber Search (XEP-0055)</description>
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/igniterealtime/openfire-search-plugin/issues</url>
+    </issueManagement>
+    <scm>
+        <connection>scm:git:https://github.com/igniterealtime/openfire-search-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:igniterealtime/openfire-search-plugin.git</developerConnection>
+        <url>https://github.com/igniterealtime/openfire-search-plugin</url>
+    </scm>
     <developers>
         <developer>
             <name>Ryan Graham</name>
         </developer>
     </developers>
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
     <repositories>
         <!-- Where we obtain dependencies. -->
