@@ -727,7 +727,8 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     private IQ replyDataFormResult(Collection<User> users, IQ packet) {
         final DataForm searchResults = new DataForm(DataForm.Type.result);
 
-        searchResults.addField("FORM_TYPE", null, FormField.Type.hidden);
+        searchResults.addField("FORM_TYPE", null, FormField.Type.hidden)
+            .addValue(NAMESPACE_JABBER_IQ_SEARCH);
 
         searchResults.addReportedField("jid", "JID", FormField.Type.jid_single);
 
