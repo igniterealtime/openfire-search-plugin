@@ -608,7 +608,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         for (Entry<String, String> entry : searchList.entrySet()) {
             String field = entry.getKey();
             String query = entry.getValue();
-            if (userManager != null && query.length() > 0 && !query.equals(NAMESPACE_JABBER_IQ_SEARCH)) {
+            if (!query.isEmpty() && !query.equals(NAMESPACE_JABBER_IQ_SEARCH)) {
                 if (max >= 0) {
                     users.addAll(userManager.findUsers(new HashSet<String>(Arrays.asList(field)), query, startIndex, max));
                 } else {
