@@ -722,7 +722,8 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         searchResults.addField("FORM_TYPE", null, FormField.Type.hidden)
             .addValue(NAMESPACE_JABBER_IQ_SEARCH);
 
-        searchResults.addReportedField("jid", "JID", FormField.Type.jid_single);
+        String fieldLabelJid = LocaleUtils.getLocalizedString("advance.user.search.jid", "search", null, preferredLocale, false);
+        searchResults.addReportedField("jid", fieldLabelJid, FormField.Type.jid_single);
         String fieldLabelEmail = LocaleUtils.getLocalizedString("advance.user.search.email", "search", null, preferredLocale, false);
         searchResults.addReportedField("email", fieldLabelEmail, FormField.Type.text_single);
 
