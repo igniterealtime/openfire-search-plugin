@@ -604,7 +604,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
     private Set<User> performSearch(Element incomingForm, int startIndex, int max) {
         Set<User> users = new HashSet<User>();
 
-        Hashtable<String, String> searchList = extractSearchQuery(incomingForm);
+        Map<String, String> searchList = extractSearchQuery(incomingForm);
 
         for (Entry<String, String> entry : searchList.entrySet()) {
             String field = entry.getKey();
@@ -654,7 +654,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @return The search query for a particular user search request.
      */
     @SuppressWarnings("unchecked")
-    private Hashtable<String, String> extractSearchQuery(Element incomingForm) {
+    private Map<String, String> extractSearchQuery(Element incomingForm) {
         if (incomingForm.element(QName.get("x", "jabber:x:data")) != null) {
             // forward the request.
             return extractExtendedSearchQuery(incomingForm);
@@ -689,7 +689,7 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @see #extractSearchQuery(Element)
      */
     @SuppressWarnings("unchecked")
-    private Hashtable<String, String> extractExtendedSearchQuery(Element incomingForm) {
+    private Map<String, String> extractExtendedSearchQuery(Element incomingForm) {
         final Element dataform = incomingForm.element(QName.get("x", "jabber:x:data"));
 
         Hashtable<String, String> searchList = new Hashtable<String, String>();
