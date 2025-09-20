@@ -92,7 +92,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
     private UserManager userManager;
     private ComponentManager componentManager;
-    private PluginManager pluginManager;
 
     private String serviceName;
     private boolean serviceEnabled;
@@ -163,8 +162,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      * @see org.jivesoftware.openfire.container.Plugin#initializePlugin(org.jivesoftware.openfire.container.PluginManager, java.io.File)
      */
     public void initializePlugin(PluginManager manager, File pluginDirectory) {
-        pluginManager = manager;
-
         componentManager = ComponentManagerFactory.getComponentManager();
         try {
             componentManager.addComponent(serviceName, this);
@@ -197,7 +194,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
      */
     public void destroyPlugin() {
         PropertyEventDispatcher.removeListener(this);
-        pluginManager = null;
         try {
             componentManager.removeComponent(serviceName);
             componentManager = null;
