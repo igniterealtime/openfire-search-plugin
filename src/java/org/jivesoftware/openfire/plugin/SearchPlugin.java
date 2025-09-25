@@ -124,7 +124,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         excludedFields = StringUtils.stringToCollection(JiveGlobals.getProperty(EXCLUDEDFIELDS, ""));
         groupOnly = JiveGlobals.getBooleanProperty(GROUPONLY);
 
-        serverName = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
         userManager = UserManager.getInstance();
 
         // Some clients, such as Miranda, are hard-coded to search specific fields,
@@ -211,7 +210,6 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         serviceName = null;
         userManager = null;
         excludedFields = null;
-        serverName = null;
         fieldLookup = null;
         reverseFieldLookup = null;
     }
@@ -735,12 +733,12 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
 
         for (final User user : users) {
             final String username = JID.unescapeNode(user.getUsername());
-            String jid = username + "@" + serverName;
+            JID jid = XMPPServer.getInstance().createJID(username, null);
             String name = user.isNameVisible() ? removeNull(user.getName()) : "";
             String email = user.isEmailVisible() ? removeNull(user.getEmail()) : "";
 
             final LinkedHashMap<String, Object> item = new  LinkedHashMap<String, Object>();
-            item.put("jid", jid);
+            item.put("jid", jid.toString());
             item.put("Username", username);
             item.put("Name", name);
             item.put("Email", email);
@@ -771,10 +769,10 @@ public class SearchPlugin implements Component, Plugin, PropertyEventListener {
         for (User user : users) {
             Element item = replyQuery.addElement("item");
             String username = JID.unescapeNode(user.getUsername());
-            String jid = username + "@" + serverName;
+            JID jid = XMPPServer.getInstance().createJID(username, null);
             String name = user.isNameVisible() ? removeNull(user.getName()) : "";
             String email = user.isEmailVisible() ? removeNull(user.getEmail()) : "";
-            item.addAttribute("jid", jid);
+            item.addAttribute("jid", jid.toString());
 
             // return to the client the same fields that were submitted
             for (String field : reverseFieldLookup.keySet()) {
